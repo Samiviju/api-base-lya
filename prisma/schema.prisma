@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id      Int      @id @default(autoincrement())
+  email   String   @unique
+  name    String?
+  lastName String?
+  userType  UserType
+  electronicPoints ElectronicPoint[]
+  employees  Employees?
+}
+
+model ElectronicPoint {
+  id         Int       @id @default(autoincrement())
+  user       User?     @relation(fields: [userId], references: [id])
+  userId     Int?
+  entryDate  DateTime
+  departureDte  DateTime
+  reports         Report[]
+}
+
+model Departments {
+  id      Int       @id @default(autoincrement())
+  name    String?
+  employees   Employees[]
+}
+
+model Employees {
+  id             Int          @id @default(autoincrement()) 
+  user           User         @relation(fields: [userId], references: [id])
+  userId         Int          @unique // Definindo userId como único
+  departments    Departments  @relation(fields: [departmentsId], references: [id])
+  departmentsId  Int
+  office         String
+  wage           Float
+  holidaysLicenses    HolidaysLicense[]
+}
+
+model Report{
+  id              Int      @id @default(autoincrement())
+  point           ElectronicPoint @relation(fields: [pointId], references: [id])
+  pointId         Int
+  workedHours     Float
+  overtime        Float
+  fouls           Int
+  delays          Int
+}
+
+model HolidaysLicense{
+  id              Int      @id @default(autoincrement())
+  employees       Employees @relation(fields: [employeesId], references: [id])
+  employeesId     Int
+  type            HolidaysLicenseType
+  dateStart       DateTime
+  endDate         DateTime
+}
+
+enum UserType {
+  ADMIN
+  FUNCIONARIO
+}
+
+enum HolidaysLicenseType {
+  FERIAS
+  LICENCAMEDICA
+  LICENCANAOREMUNERADA
+}
